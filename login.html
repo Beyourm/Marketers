@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -102,10 +103,8 @@
               </div>
             </div>
 
-            <form id="signupForm" style="display: none;"> 
-              <h3>يرجى تعبئة بياناتك بدقة للحصول على رابط الإحالة الخاص بك.
-يُرجى التأكد من إدخال معلومات صحيحة لضمان تفعيل الخدمة بسلاسة، ولتمكين فريقنا من التواصل معك عند الحاجة إلى أي دعم أو متابعة.
-</h3>
+            <form id="signupForm">
+              <h3>سجّل بياناتك للحصول على رابط إحالة خاص بك</h3>
               <div class="row">
                 <div class="col">
                   <label for="fullname">الاسم الثلاثي</label>
@@ -122,7 +121,7 @@
                     <option value="">اختر الجنس</option>
                     <option value="ذكر">ذكر</option>
                     <option value="أنثى">أنثى</option>
-        
+                    <option value="آخر">آخر</option>
                   </select>
                 </div>
                 <div class="col">
@@ -324,30 +323,22 @@
 
     // التحكم بظهور الشروط ونموذج التسجيل
     
-    // ****** تم تعديل هذه الدالة لإخفاء/إظهار نموذج التسجيل مباشرةً ******
     acceptCheckbox.addEventListener('change', () => {
       submitBtn.disabled = !acceptCheckbox.checked; // تفعيل/تعطيل زر الإرسال
-      
       if(acceptCheckbox.checked){
-        // إظهار نموذج التسجيل بعد الموافقة
-        signupFormElement.style.display = 'block'; 
-        
-        // هنا تم استخدام classList فقط لأسباب جمالية (مثل تصغير قسم الشروط)
+        signupFormElement.classList.add('show');
         termsSection.classList.add('compact'); 
         if (window.innerWidth <= 600) {
             signupFormElement.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
-        // إخفاء النموذج عند إلغاء الموافقة
-        signupFormElement.style.display = 'none'; 
-        
+        signupFormElement.classList.remove('show');
         termsSection.classList.remove('compact');
       }
     });
 
     backBtn.addEventListener('click', () => {
-      // إخفاء النموذج والعودة للشروط عند الضغط على "العودة"
-      signupFormElement.style.display = 'none'; 
+      signupFormElement.classList.remove('show');
       termsSection.classList.remove('compact');
       acceptCheckbox.checked = false;
       submitBtn.disabled = true;
@@ -359,8 +350,7 @@
       localStorage.setItem(MARKETER_SESSION_KEY, JSON.stringify(data));
       
       // 2. بناء رابط الإحالة لصفحة home.html لتمرير المعرّف
-      // استخدام مسار مطلق (جذري) /home.html لضمان التوجيه الصحيح
-      const homeUrl = new URL('/home.html', window.location.origin);
+      const homeUrl = new URL('home.html', window.location.href);
       if (data.marketer_id) {
         homeUrl.searchParams.set('marketer_id', data.marketer_id);
       }
@@ -397,6 +387,13 @@
 
         // إضافة مستمع لزر التحقق
         document.getElementById('verifyOtpBtn').addEventListener('click', handleOtpVerification);
+        
+        // محاولة جلب البيانات المخزنة إذا كانت موجودة، لضمان استمرار الجلسة
+        const storedData = localStorage.getItem(OTP_PENDING_KEY);
+        if (storedData) {
+            // تحديث المتغير المؤقت من التخزين المحلي فوراً إذا وجدنا البيانات
+            pendingLoginData = JSON.parse(storedData);
+        }
     }
     
     // إخفاء حقول OTP
@@ -406,30 +403,24 @@
             otpContainer.remove();
         }
         pendingLoginData = null; // مسح المتغير المؤقت من الذاكرة
+        // ***** تم حذف: localStorage.removeItem(OTP_PENDING_KEY); من هنا *****
         loginSubmitBtn.style.display = 'block'; // إعادة زر تسجيل الدخول الأصلي
-        localStorage.removeItem(OTP_PENDING_KEY); // مسح البيانات المعلقة في التخزين المحلي
     }
     
-    // معالج التحقق من OTP (تم تحسين منطق استرجاع البيانات المعلقة)
+    // معالج التحقق من OTP
     async function handleOtpVerification() {
         const otpInput = document.getElementById('otpCode').value.trim();
         const verifyOtpBtn = document.getElementById('verifyOtpBtn');
 
-        // 1. محاولة جلب البيانات من الذاكرة (الأولوية)
+        // 1. محاولة جلب البيانات من الجلسة المؤقتة (الأولوية)
         let currentPendingData = pendingLoginData;
         
-        // 2. إذا كانت فارغة، حاول جلبها من التخزين المحلي (لتغطية حالة تحديث الصفحة)
+        // 2. إذا كانت فارغة، حاول جلبها من التخزين المحلي (للتغطية في حالة تحديث الصفحة)
         if (!currentPendingData) {
             const storedData = localStorage.getItem(OTP_PENDING_KEY); 
             if (storedData) {
-                try {
-                    currentPendingData = JSON.parse(storedData);
-                    pendingLoginData = currentPendingData; // تحديث الذاكرة المؤقتة أيضاً
-                } catch (e) {
-                    console.error("خطأ في تحليل بيانات OTP المعلقة:", e);
-                    localStorage.removeItem(OTP_PENDING_KEY);
-                    currentPendingData = null;
-                }
+                currentPendingData = JSON.parse(storedData);
+                pendingLoginData = currentPendingData; // تحديث الذاكرة المؤقتة أيضاً
             }
         }
         
@@ -438,12 +429,13 @@
             showMessage(loginErrorBox, 'الرجاء إدخال رمز تحقق صحيح (6 أرقام).');
             return;
         }
+        
 
-        // التحقق من وجود بيانات الدخول
-        if (!currentPendingData || !currentPendingData.email || !currentPendingData.password) {
+        // التحقق من وجود بيانات الدخول (التي كانت تسبب الخطأ الفوري)
+        if (!currentPendingData) {
             showMessage(loginErrorBox, 'انتهت جلسة تسجيل الدخول. الرجاء البدء من جديد بإدخال البريد وكلمة المرور.');
+            // مسح أي بقايا في التخزين المحلي لضمان تنظيف كامل
             localStorage.removeItem(OTP_PENDING_KEY);
-            hideOtpInput(); // تنظيف الواجهة
             return;
         }
 
@@ -465,7 +457,7 @@
 
         if (result.success) {
             // النجاح: مسح بيانات الجلسة المؤقتة بعد النجاح
-            localStorage.removeItem(OTP_PENDING_KEY); 
+            localStorage.removeItem(OTP_PENDING_KEY); // ****** مسح بيانات التخزين المحلي ******
             pendingLoginData = null; 
             
             showMessage(loginErrorBox, 'تم تأكيد الجهاز بنجاح! يتم الآن توجيهك...', 1500);
@@ -493,13 +485,13 @@
           return;
       }
       
-      // حفظ البيانات مؤقتًا في الذاكرة
+      // حفظ البيانات مؤقتًا في الذاكرة (الأولوية)
       pendingLoginData = { email, password }; 
       
-      // تخزين البيانات في localStorage في حالة طلب OTP
+      // ****** إضافة تخزين البيانات في localStorage في حالة طلب OTP (يتم مسحها فقط عند النجاح أو الفشل) ******
       localStorage.setItem(OTP_PENDING_KEY, JSON.stringify(pendingLoginData)); 
       
-      // إخفاء حقل OTP (إذا كان موجوداً)
+      // ****** إخفاء حقل OTP في بداية محاولة الدخول. التخزين المحلي لن يتم مسحه هنا الآن ******
       hideOtpInput(); 
       // *************************************************************************************************
       
@@ -522,13 +514,13 @@
         localStorage.removeItem(OTP_PENDING_KEY); // مسح البيانات الاحتياطية
         showWelcome(result); 
       } else if (result.require_otp) {
-        // حالة الجهاز الجديد: طلب رمز OTP (نحتفظ بالبيانات المخزنة: pendingLoginData)
+        // حالة الجهاز الجديد: طلب رمز OTP (هنا نحتفظ بالبيانات المخزنة)
         showMessage(loginErrorBox, result.message, 5000);
         createOtpInput();
         loginSubmitBtn.style.display = 'none'; // إخفاء زر الدخول الأصلي
       } else {
-        // خطأ عام في الدخول 
-        localStorage.removeItem(OTP_PENDING_KEY); // مسح البيانات الاحتياطية لأن الجلسة انتهت بخطأ
+        // خطأ عام في الدخول (كلمة مرور خطأ، بريد غير موجود، الخ.)
+        localStorage.removeItem(OTP_PENDING_KEY); // ****** مسح البيانات الاحتياطية لأن الجلسة انتهت بخطأ
         pendingLoginData = null; 
         showMessage(loginErrorBox, result.message);
       }
@@ -661,11 +653,11 @@
       location.reload(); 
     });
 
-    // عند تحميل الصفحة (مُعدّلة للتحقق من الجلسة المخزنة والتوجيه واستعادة OTP)
+    // عند تحميل الصفحة (مُعدّلة للتحقق من الجلسة المخزنة والتوجيه)
     window.addEventListener('DOMContentLoaded', ()=>{
       getDeviceSerial(); // توليد المعرّف إذا لم يكن موجوداً
       
-      // 1. منطق استعادة الجلسة وإعادة التوجيه الفوري
+      // ****** منطق استعادة الجلسة وإعادة التوجيه الفوري ******
       const sessionData = localStorage.getItem(MARKETER_SESSION_KEY);
       if (sessionData) {
           try {
@@ -674,7 +666,6 @@
               if(data.marketer_id && data.affiliate_link){
                  // إعادة التوجيه الفوري باستخدام الدالة الجديدة
                  showWelcome(data);
-                 return; // إيقاف التنفيذ بعد التوجيه
               } else {
                  localStorage.removeItem(MARKETER_SESSION_KEY); // مسح البيانات الناقصة
               }
@@ -683,35 +674,27 @@
               localStorage.removeItem(MARKETER_SESSION_KEY); // مسح البيانات التالفة
           }
       }
+      // ******************************************************
 
-      // 2. التحقق إذا كنا في انتظار OTP عند تحميل الصفحة (الأولوية بعد التحقق من الجلسة)
-      const storedPendingData = localStorage.getItem(OTP_PENDING_KEY);
-      if(storedPendingData) {
+      // إخفاء واجهة الترحيب عند تحميل الصفحة إذا لم يتم التوجيه (لأنه واجهة index.html الأساسية هي تسجيل الدخول/التسجيل)
+      welcomeLoggedIn.style.display = 'none';
+      
+      // ****** التحقق إذا كنا في انتظار OTP عند تحميل الصفحة ******
+      const storedData = localStorage.getItem(OTP_PENDING_KEY);
+      if(storedData) {
           // إذا وجدنا بيانات، فهذا يعني أن المستخدم حدث الصفحة أثناء انتظار OTP
+          // نعيد بناء حقل OTP مباشرة وننتقل إلى واجهة تسجيل الدخول
           
-          // تأكد من أننا في واجهة تسجيل الدخول
+          // تأكد من أننا في واجهة تسجيل الدخول (في حال كنا على تبويب التسجيل الجديد)
           actionButtons.forEach(b => b.classList.remove('active'));
           document.querySelector('[data-action="login"]').classList.add('active');
           loginWrapper.style.display = 'block';
           registerWrapper.style.display = 'none';
           
-          try {
-              // تحديث المتغير المؤقت من التخزين المحلي فوراً إذا وجدنا البيانات
-              pendingLoginData = JSON.parse(storedPendingData); 
-          } catch (e) {
-              console.error("خطأ في تحليل بيانات OTP المعلقة:", e);
-              localStorage.removeItem(OTP_PENDING_KEY);
-              return; // إيقاف التنفيذ إذا كانت البيانات تالفة
-          }
-          
           createOtpInput();
           loginSubmitBtn.style.display = 'none'; // إخفاء زر الدخول الأصلي
-          showMessage(loginErrorBox, 'الرجاء إدخال رمز التحقق الذي وصلك على البريد لاستكمال الدخول.', 5000);
       }
       // ************************************************************
-      
-      // إخفاء واجهة الترحيب عند تحميل الصفحة إذا لم يتم التوجيه
-      welcomeLoggedIn.style.display = 'none';
     });
   </script>
 </body>
