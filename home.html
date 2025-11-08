@@ -528,35 +528,43 @@ animation: heartbeat 1.5s infinite;
   // ------------------------------------------------------------------
   // ** الدوال الأساسية لجلب المعرّف وتشغيل لوحة التحكم **
   // ------------------------------------------------------------------
+  
+  /**
+   * 🛑 التعديل: تطبيق منطق التحقق الأمني المزدوج
+   * يتم التحقق من تطابق المعرّف المخزن مع المعرّف داخل كائن الجلسة.
+   * @returns {string | null} المعرّف الصحيح والمؤمّن، أو null إذا فشل التحقق.
+   */
   function getMarketerId() {
-    const marketerId = localStorage.getItem(LOCAL_MARKETER_KEY);
-    const sessionData = localStorage.getItem(MARKETER_SESSION_KEY);
-    
-    // 💡 التحقق 1: هل هناك معرّف مخزن؟
-    if (!marketerId) {
-        return null;
-    }
-    
-    // 💡 التحقق 2: هل هناك جلسة تسجيل دخول نشطة؟
-    // هذا هو التحقق الأمني لمنع مسوِّق من رؤية بيانات الآخر بمجرد تغيير المعرّف
-    if (!sessionData) {
-        console.warn("Session data missing. Redirecting to login.");
-        // إذا لم توجد جلسة، امسح المعرّف المخزن وأعد التوجيه
-        localStorage.removeItem(LOCAL_MARKETER_KEY); 
-        window.location.href = "login.html"; 
-        return null;
-    }
-
-    return marketerId;
-}
+      const marketerId = localStorage.getItem(LOCAL_MARKETER_KEY);
+      const sessionDataRaw = localStorage.getItem(MARKETER_SESSION_KEY);
+      
+      if (!marketerId || !sessionDataRaw) {
+          return null; 
+      }
+      
+      try {
+          const sessionData = JSON.parse(sessionDataRaw);
+          // التحقق الأمني: يجب أن يتطابق المعرّف المخزن مع المعرّف الموجود في بيانات الجلسة
+          if (sessionData.marketer_id && sessionData.marketer_id.toUpperCase() === marketerId.toUpperCase()) {
+              return marketerId; // المعرّف مؤمن وصحيح
+          } else {
+              console.warn("Security Alert: Stored ID does not match session ID.");
+              return null; // فشل التحقق
+          }
+      } catch (e) {
+          console.error("Error parsing session data:", e);
+          return null;
+      }
+  }
 
   
   // 💡 دالة للحصول على المعرف من localStorage أو رابط URL الحالي
   function getMarketerIdForDialog() {
+       // 🛑 التعديل: الأولوية للمعّرف الآمن من الجلسة
        const storedId = getMarketerId();
        if (storedId) return storedId;
 
-       // محاولة استخلاص من رابط URL الحالي للصفحة في حال عدم وجوده في localStorage
+       // محاولة استخلاص من رابط URL الحالي (هذا المعرّف غير مؤمّن ويجب ألا يستخدم لتحميل البيانات)
        const urlParams = new URLSearchParams(window.location.search);
        // تستخدم 'TTTTTT11' كمعرف افتراضي إذا لم يتم العثور على أي شيء
        return urlParams.get('marketer_id') || urlParams.get('id') || 'TTTTTT11';
@@ -566,23 +574,33 @@ animation: heartbeat 1.5s infinite;
   function initDashboard() {
       const marketerId = getMarketerId();
       
+      // 🛑 التعديل الأمني الرئيسي: التحقق من وجود المعرّف الصحيح
       if (marketerId) {
-          console.log("Marketer ID loaded from storage:", marketerId);
+          console.log("Marketer ID loaded and verified:", marketerId);
           fetchData(marketerId);
           initBalanceDisplay();
           renderDiscountSection(); 
       } else {
-          // رسالة الخطأ للمستخدمين غير المسجلين أو الذين فقدوا الجلسة
+          // إذا فشل التحقق الأمني أو لم يكن هناك معرّف مخزن
           updateStatus(`
-              ⚠️ **المعرّف مفقود.** الرجاء فتح لوحة التحكم مرة أخرى عبر رابط الإحالة الخاص بك (الذي يحتوي على marketer_id) لتخزين المعرّف تلقائياً.
+              ⚠️ **الجلسة غير صالحة أو المعرّف مفقود/تم التلاعب به.** سيتم إعادة توجيهك لتسجيل الدخول.
               <br>
               <span style="font-size: 0.9em;">
-              إذا كنت تفتح اللوحة لأول مرة، يجب استخدام رابط الإحالة.
+              الرجاء التأكد من الدخول عبر الرابط المخصص لك.
               </span>
               `, 'error');
-          marketerIdDisplay.innerHTML = `المعرّف مفقود (الرجاء استخدام رابط الإحالة).`;
+              
+          marketerIdDisplay.innerHTML = `المعرّف غير متوفر.`;
           dashboardContent.style.display = 'none';
           document.getElementById('current-balance').textContent = '...';
+          
+          // 🚨 إعادة التوجيه إلى صفحة تسجيل الدخول بعد 3 ثوانٍ
+          setTimeout(() => {
+              // تنظيف البيانات غير الصالحة قبل التوجيه (لإجبار المستخدم على الدخول مجدداً)
+              localStorage.removeItem(LOCAL_MARKETER_KEY); 
+              localStorage.removeItem(MARKETER_SESSION_KEY); 
+              window.location.href = "index.html"; 
+          }, 3000);
       }
   }
 
@@ -611,7 +629,7 @@ animation: heartbeat 1.5s infinite;
       localStorage.removeItem('dashboardStats');
 
       mainFooter.style.display = "none";
-      window.location.href = "login.html";
+      window.location.href = "index.html"; // تم تغيير login.html إلى index.html
     }
 
     if (logoutBtn) {
@@ -656,7 +674,7 @@ animation: heartbeat 1.5s infinite;
     const container = document.getElementById('discount-container');
     if (!container) return;
 
-    // 💡 نعتمد على المعرّف من getMarketerId
+    // 💡 نعتمد على المعرّف من getMarketerId (الآن أصبح مؤمناً)
     const marketerId = getMarketerId();
     const verified = sessionStorage.getItem(ADMIN_AUTH_KEY) === '1';
 
@@ -669,10 +687,10 @@ animation: heartbeat 1.5s infinite;
 
     
   async function onDiscountSearchClickSecure() {
-    // 💡 نعتمد على المعرّف من getMarketerId
+    // 💡 نعتمد على المعرّف من getMarketerId (الآن أصبح مؤمناً)
     const marketerId = getMarketerId();
     if (!marketerId) {
-      alert('المعرّف غير موجود. الرجاء التأكد من تحميل لوحة التحكم باستخدام رابط الإحالة.');
+      alert('المعرّف غير موجود أو غير مؤمّن. الرجاء تسجيل الدخول بشكل صحيح.');
       return;
     }
 
@@ -963,7 +981,8 @@ function displayData(data) {
 async function fetchData(marketerId) {
     updateStatus('جارٍ جلب بيانات الإحالات...');
 
-    if (!marketerId || marketerId.length < 3) {
+    // 🛑 التحقق الأمني مجدداً قبل الإرسال
+    if (!getMarketerId() || marketerId.length < 3) {
         updateStatus('⚠️ المعرّف غير صالح. الرجاء التأكد من المعرف المخزن.', 'error');
         return;
     }
@@ -1085,9 +1104,10 @@ async function initBalanceDisplay() {
     
   const marketerId = getMarketerId();
     
+  // 🛑 التحقق الأمني: إذا فشل التحقق، نتوقف هنا
   if (!marketerId) {
     const balanceElement = document.getElementById('current-balance');
-    balanceElement.textContent = '⚠️ المعرف مفقود';
+    balanceElement.textContent = '⚠️ المعرف مفقود/غير مؤمّن';
     balanceElement.style.fontSize = '1.8rem';
 
     document.getElementById('total-members').textContent = '0';
