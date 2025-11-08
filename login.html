@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مسوقي مؤسسة "كن أنت" للتدريب والتأهيل</title>
+
+  <!-- تحميل Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- خط تاجاول (الخط العربي الرئيسي) -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <!-- أيقونات Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <meta property="og:title" content="مؤسسة كن أنت للتدريب والتأهيل" />
+  <meta property="og:description" content="انضم لمسوقي مؤسسة كن أنت وكن جزءًا من صناعة القادة. سجل بياناتك الآن لتبدأ رحلتك معنا." />
+  <meta property="og:image" content="https://placehold.co/1200x630/4CAF50/ffffff?text=كن+أنت+للتدريب" />
+  <meta property="og:url" content="https://sklilia.netlify.app/Trainees_Records" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ar_AR" />
+  
+  <style>
+    :root {
+      --primary-color: #4CAF50; /* الأخضر الأساسي */
+      --secondary-color: #FF9800; /* البرتقالي الثانوي */
+      --background-color: #f0f4f8; 
+      --card-bg: #ffffff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: var(--background-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      direction: rtl;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+    }
+    
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    
+    .content {
+      padding: 25px;
+    }
+    
+    /* أزرار اختيار الإجراء (تسجيل الدخول / تسجيل جديد) */
+    #actionSelector {
+      display: flex;
+      margin-bottom: 25px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #ccc;
+    }
+    
+    .action-btn {
+      flex: 1;
+      padding: 12px;
+      background-color: #f9f9f9;
+      color: #333;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+    
+    .action-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* نماذج الإدخال والتنسيق */
+    .form-wrapper {
+      position: relative;
+      padding: 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .form-wrapper h3 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap; /* لضمان التجاوب على الموبايل */
+    }
+    
+    .col {
+      flex: 1;
+      min-width: 45%;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px 10px 10px 40px; /* مساحة للأيقونة */
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus {
+      border-color: var(--secondary-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+    }
+    
+    .decorator-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      cursor: pointer;
+    }
+    
+    /* رسائل النظام */
+    .error, .success {
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-weight: 700;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      transform: translateY(10px);
+    }
+    
+    .error.show, .success.show {
+      display: flex;
+      align-items: center;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .error {
+      background-color: #ffebee;
+      color: #D32F2F;
+    }
+    
+    .success {
+      background-color: #e2f0e4;
+      color: var(--primary-color);
+    }
+
+    .error i, .success i {
+      margin-left: 10px;
+    }
+    
+    /* الأزرار الرئيسية */
+    .btn-accept, .btn-decline {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s, box-shadow 0.3s, opacity 0.3s;
+    }
+    
+    .btn-accept {
+      background-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
+    }
+    
+    .btn-accept:hover:not(:disabled) {
+      background-color: #43A047;
+      box-shadow: 0 6px 8px rgba(76, 175, 80, 0.4);
+    }
+    
+    .btn-accept:disabled {
+      background-color: #A5D6A7;
+      cursor: not-allowed;
+    }
+
+    .btn-decline {
+      background-color: #ccc;
+      color: #333;
+    }
+    
+    .btn-decline:hover:not(:disabled) {
+      background-color: #b3b3b3;
+    }
+
+    /* قسم الشروط */
+    #termsSection {
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background-color: #fcfcfc;
+      transition: all 0.5s ease;
+    }
+    
+    .terms {
+      max-height: 250px;
+      overflow-y: auto;
+      padding-left: 10px;
+      margin-bottom: 15px;
+      transition: max-height 0.5s ease;
+    }
+
+    #termsSection.compact .terms {
+        max-height: 100px;
+    }
+
+    ol {
+      margin-right: 15px;
+    }
+    
+    .approval-label {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--primary-color);
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    /* حقل النموذج المخفي */
+    #signupForm {
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transition: opacity 0.5s, height 0.5s;
+    }
+    
+    #signupForm.show {
+      opacity: 1;
+      height: auto;
+      overflow: visible;
+      margin-top: 20px;
+    }
+
+    /* حالة التحميل */
+    .loading {
+      opacity: 0.8;
+    }
+
+    /* تنسيق رابط النسخ */
+    .copy-link-container {
+        position: relative;
+        display: flex;
+        width: 90%;
+        max-width: 400px;
+        margin: 15px auto 0;
+    }
+
+    #affiliateLinkDisplay {
+        flex-grow: 1;
+        background-color: #eee;
+        border: 2px solid var(--primary-color);
+        padding-right: 10px !important;
+        font-size: 0.9rem;
+    }
+
+    #copyButton {
+        width: 50px;
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px;
+        border-radius: 0 8px 8px 0;
+        margin-right: -1px;
+        transition: background-color 0.3s;
+    }
+
+    #copyButton:hover {
+        background-color: #E65100;
+    }
+
+    #copyMessage {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        background-color: #333;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        white-space: nowrap;
+        z-index: 10;
+    }
+
+    /* تجاوب مع شاشات الموبايل */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      .card {
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .col {
+        min-width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header>
+        <h1>مسوقي مؤسسة "كن أنت" للتدريب والتأهيل</h1>
+      </header>
+      <div class="content">
+
+        <!-- يتم التوجيه إلى home.html عند تسجيل الدخول بنجاح، لذا هذه الواجهة لن تظهر -->
+        <div id="welcomeLoggedIn" style="display: none;"></div>
+
+        <div id="actionSelector">
+            <button class="action-btn active" data-action="login">تسجيل الدخول</button>
+            <button class="action-btn" data-action="register">تسجيل جديد</button>
+        </div>
+        
+        <div id="loginWrapper" class="form-wrapper active slide-in-right">
+            <form id="loginForm">
+                <h3>تسجيل الدخول</h3>
+                <div class="row">
+                    <div class="col">
+                        <label for="loginEmail">البريد الإلكتروني</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-envelope decorator-icon"></i> 
+                            <input id="loginEmail" name="email" type="email" placeholder="name@example.com" required />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="loginPassword">كلمة المرور</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock decorator-icon"></i> 
+                            <input id="loginPassword" name="password" type="password" required />
+                            <i class="fa-solid fa-eye toggle-password" data-target="loginPassword" aria-label="إظهار كلمة المرور"></i> 
+                        </div>
+                    </div>
+                </div>
+                <p class="note" style="text-align: left; margin-top: 0;">
+                    <!-- هذا الرابط سيعمل فقط إذا كان لديك ملف Reset-Password.html -->
+                    <a href="Reset-Password.html" style="color: var(--primary-color); text-decoration: none;">هل نسيت كلمة المرور؟</a>
+                </p>
+                <div style="display:flex;gap:10px;align-items:center;margin-top:15px">
+                    <button type="submit" class="btn-accept" id="loginSubmitBtn">تسجيل الدخول</button>
+                </div>
+                <div class="error" id="loginErrorBox"><i class="fa-solid fa-circle-exclamation"></i> <span></span></div>
+            </form>
+        </div>
+
+        <div id="registerWrapper" class="form-wrapper" style="display: none;">
+
+            <div id="termsSection">
+              <div class="terms">
+                <h3>الشروط العامة للمسوقين</h3>
+                <ol>
+                  <li><strong>الأهلية:</strong> يحق لأي شخص بالغ الانضمام كمسوق للمؤسسة.</li>
+                  <li><strong>الهدف:</strong> نشر الوعي بالدورات وتشجيع المهتمين على التسجيل.</li>
+                  <li><strong>بيانات المسوق:</strong> يجب تقديم بيانات صحيحة.</li>
+                  <li><strong>طرق الترويج:</strong> التواصل الاجتماعي، البريد، مجموعات واتساب وتليجرام.</li>
+                  <li><strong>روابط الإحالة:</strong> استخدام الرابط والكود الشخصي فقط.</li>
+                  <li><strong>العمولات والمكافآت:</strong> تُصرف بعد التأكد من صحة التسجيلات.</li>
+                </ol>
+                <p class="note">بالموافقة على الشروط، أنت توافق على تمثيل المؤسسة بمهنية وأمانة.</p>
+              </div>
+              <div class="actions">
+                <input type="checkbox" id="acceptCheckbox" class="styled-checkbox">
+                <label for="acceptCheckbox" class="approval-label">أوافق على الشروط والأحكام</label>
+              </div>
+            </div>
+
+            <form id="signupForm">
+              <h3>سجّل بياناتك للحصول على رابط إحالة خاص بك</h3>
+              <div class="row">
+                <div class="col">
+                  <label for="fullname">الاسم الثلاثي</label>
+                  <div class="input-wrapper">
+                      <i class="fa-solid fa-user decorator-icon"></i>
+                      <input id="fullname" name="fullname" placeholder="مثال: عبدالله علي محسن" required />
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <label for="gender">الجنس</label>
+                  <select id="gender" name="gender" required>
+                    <option value="">اختر الجنس</option>
+                    <option value="ذكر">ذكر</option>
+                    <option value="أنثى">أنثى</option>
+                    <option value="آخر">آخر</option>
+                  </select>
+                </div>
+                <div class="col">
+                  <label for="country">البلد</label>
+                  <select id="country" name="country" required></select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <label for="phone">رقم الهاتف (WhatsApp)</label>
+                  <div class="input-wrapper">
+                      <i class="fa-solid fa-phone decorator-icon"></i>
+                      <input id="phone" name="phone" type="tel" placeholder="+966xxxxxxx" pattern="[+0-9\s-]{6,20}" required />
+                  </div>
+                </div>
+                <div class="col">
+                  <label for="email">البريد الإلكتروني</label>
+                  <div class="input-wrapper">
+                      <i class="fa-solid fa-envelope decorator-icon"></i>
+                      <input id="email" name="email" type="email" placeholder="name@example.com" required />
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                 <div class="col">
+                  <label for="password">كلمة المرور</label>
+                  <div class="input-wrapper">
+                      <i class="fa-solid fa-lock decorator-icon"></i>
+                      <input id="password" name="password" type="password" required />
+                      <i class="fa-solid fa-eye toggle-password" data-target="password" aria-label="إظهار كلمة المرور"></i> 
+                  </div>
+                </div>
+                <div class="col">
+                  <label for="confirmPassword">تأكيد كلمة المرور</label>
+                  <div class="input-wrapper">
+                      <i class="fa-solid fa-lock decorator-icon"></i>
+                      <input id="confirmPassword" name="confirmPassword" type="password" required />
+                      <i class="fa-solid fa-eye toggle-password" data-target="confirmPassword" aria-label="إظهار كلمة المرور"></i> 
+                  </div>
+                </div>
+              </div>
+              <!-- الحقل المخفي الذي سيحمل معرف المُحيل (العمود P) -->
+              <input type="hidden" id="marketer_id_input" name="marketer_id_referrer" value="">
+              
+              <div style="display:flex;gap:10px;align-items:center;margin-top:15px">
+                <button type="submit" class="btn-accept" id="submitBtn" disabled>إرسال وتسجيل</button>
+                <button type="button" class="btn-decline" id="backBtn"><i class="fa-solid fa-arrow-right"></i>العودة للشروط</button>
+              </div>
+              <div class="success" id="successBox"><i class="fa-solid fa-circle-check"></i> <span>تم الإرسال بنجاح! شكرًا لتسجيلك.</span></div>
+              <div class="error" id="signupErrorBox"><i class="fa-solid fa-circle-exclamation"></i> <span></span></div>
+            </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----------------------------------------------------------------------
+    //  JS-INCLUDED FILE: url.js (الرجاء استبدال الرابط أدناه برابط Apps Script الفعلي الخاص بك)
+    // ----------------------------------------------------------------------
+    // يُرجى تغيير هذه القيمة إلى الرابط الفعلي الخاص بتطبيق الويب بعد النشر
+    const URL_LONG = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; 
+
+    // ----------------------------------------------------------------------
+    // JS-INCLUDED FILE: marketer_tracker.js (منطق تتبع المُحيل)
+    // ----------------------------------------------------------------------
+    function trackReferrer() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const marketerId = urlParams.get('marketer_id'); // افتراض أن رابط الإحالة يستخدم 'marketer_id'
+        const hiddenInput = document.getElementById('marketer_id_input');
+        
+        if (marketerId && hiddenInput) {
+            // تخزين المعرّف في الحقل المخفي ليتم إرساله مع طلب التسجيل
+            hiddenInput.value = marketerId;
+            // يمكنك هنا تخزينه في localStorage ليبقى حتى إذا غادر المستخدم الصفحة وعاد
+            localStorage.setItem('stored_marketer_id', marketerId);
+        } else {
+            // التحقق من localStorage في حالة أن المستخدم فقد البارامتر من الرابط
+            const storedId = localStorage.getItem('stored_marketer_id');
+            if (storedId && hiddenInput) {
+                 hiddenInput.value = storedId;
+            }
+        }
+    }
+    trackReferrer(); // تفعيل دالة التتبع عند بداية تحميل الصفحة
+
+    // ----------------------------------------------------------------------
+    // الثوابت والعناصر العامة
+    // ----------------------------------------------------------------------
+    const DEVICE_SERIAL_KEY = 'marketer_device_serial';
+    const MARKETER_SESSION_KEY = 'marketer_session_data'; 
+    const OTP_PENDING_KEY = 'otp_pending_login'; 
+    
+    const actionButtons = document.querySelectorAll('.action-btn');
+    const loginWrapper = document.getElementById('loginWrapper');
+    const registerWrapper = document.getElementById('registerWrapper');
+    const loginForm = document.getElementById('loginForm');
+    const signupFormElement = document.getElementById('signupForm');
+    const loginErrorBox = document.getElementById('loginErrorBox');
+    const signupErrorBox = document.getElementById('signupErrorBox');
+    const successBox = document.getElementById('successBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const acceptCheckbox = document.getElementById('acceptCheckbox');
+    const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+    const welcomeLoggedIn = document.getElementById('welcomeLoggedIn');
+    const termsSection = document.getElementById('termsSection');
+    const backBtn = document.getElementById('backBtn');
+    
+    let pendingLoginData = null; 
+
+    // ----------------------------------------------------------------------
+    // دوال إدارة حالة التحميل للأزرار
+    // ----------------------------------------------------------------------
+    function setLoadingState(buttonElement, loadingText = 'جاري الإرسال...', originalText = '') {
+        if (!buttonElement.dataset.originalText) {
+            buttonElement.dataset.originalText = originalText || buttonElement.innerHTML;
+        }
+        buttonElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${loadingText}`;
+        buttonElement.disabled = true;
+        buttonElement.classList.add('loading');
+    }
+
+    function resetButton(buttonElement) {
+        buttonElement.innerHTML = buttonElement.dataset.originalText || 'إرسال'; 
+        buttonElement.disabled = false;
+        buttonElement.classList.remove('loading');
+    }
+    // ----------------------------------------------------------------------
+    
+    // دالة موحدة لعرض الرسائل (Success/Error)
+    function showMessage(box, text, duration = 3000) {
+        const messageElement = box.querySelector('span') || box;
+        messageElement.textContent = text;
+        box.classList.add('show');
+        setTimeout(() => { box.classList.remove('show'); }, duration);
+    }
+    
+    // ----------------------------------------------------------------------
+    // دالة الحصول على/توليد معرّف الجهاز (Device Serial)
+    function getDeviceSerial() {
+        let serial = localStorage.getItem(DEVICE_SERIAL_KEY);
+        if (!serial) {
+            // توليد معرّف عشوائي بسيط إذا لم يكن موجوداً
+            serial = 'DVS' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+            localStorage.setItem(DEVICE_SERIAL_KEY, serial);
+        }
+        return serial;
+    }
+
+    // ----------------------------------------------------------------------
+    // دالة الاتصال بخادم Google Apps Script
+    async function sendDataToScript(action, formData) {
+        // إضافة معرّف الجهاز لكل طلب
+        const device_serial = getDeviceSerial();
+        const payload = { action, device_serial, ...formData };
+        
+        try {
+            const response = await fetch(URL_LONG, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                body: JSON.stringify(payload)
+            });
+
+            const text = await response.text();
+            const result = JSON.parse(text);
+
+            return result;
+
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            return { success: false, message: "فشل الاتصال بالخادم. تحقق من الرابط أو اتصالك بالشبكة." };
+        }
+    }
+    // ----------------------------------------------------------------------
+    
+    // دالة التبديل بين التبويبات (تسجيل الدخول / تسجيل جديد)
+    function switchTab(targetWrapper, currentWrapper, direction) {
+      if(targetWrapper.classList.contains('active')) return;
+      
+      // تبسيط الأنماط الحركية (لا يوجد دعم لـ slide-in-left/right في CSS المرفق، لذا نستخدم display)
+      
+      currentWrapper.classList.remove('active');
+      currentWrapper.style.display = 'none';
+        
+      targetWrapper.style.display = 'block';
+      targetWrapper.classList.add('active');
+
+      // إزالة نموذج OTP إذا تم التبديل
+      hideOtpInput();
+    }
+
+    actionButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const isLogin = btn.dataset.action === 'login';
+        
+        const direction = isLogin ? 'right' : 'left'; 
+        const target = isLogin ? loginWrapper : registerWrapper;
+        const current = isLogin ? registerWrapper : loginWrapper;
+
+        actionButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        switchTab(target, current, direction);
+        // إزالة نموذج OTP إذا تم التبديل
+        hideOtpInput();
+      });
+    });
+
+    // التحكم بظهور الشروط ونموذج التسجيل
+    
+    acceptCheckbox.addEventListener('change', () => {
+      submitBtn.disabled = !acceptCheckbox.checked; 
+      if(acceptCheckbox.checked){
+        signupFormElement.classList.add('show');
+        termsSection.classList.add('compact'); 
+        if (window.innerWidth <= 600) {
+            // لضمان ظهور النموذج بشكل كامل على الموبايل
+            signupFormElement.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+        }
+      } else {
+        signupFormElement.classList.remove('show');
+        termsSection.classList.remove('compact');
+      }
+    });
+
+    backBtn.addEventListener('click', () => {
+      signupFormElement.classList.remove('show');
+      termsSection.classList.remove('compact');
+      acceptCheckbox.checked = false;
+      submitBtn.disabled = true;
+    });
+
+    // ****** دالة عرض الترحيب المُعدّلة لإعادة التوجيه مع تمرير Marketer ID ******
+    function showWelcome(data){
+      // 1. تخزين بيانات الجلسة 
+      localStorage.setItem(MARKETER_SESSION_KEY, JSON.stringify(data));
+      
+      // 2. بناء رابط الإحالة لصفحة home.html لتمرير المعرّف
+      const homeUrl = new URL('home.html', window.location.href);
+      if (data.marketer_id) {
+        homeUrl.searchParams.set('marketer_id', data.marketer_id);
+      }
+      
+      // 3. إعادة التوجيه إلى صفحة التحكم (home.html) مع المعرّف
+      window.location.href = homeUrl.toString();
+    }
+    // **************************************************************************
+    
+    // ----------------------------------------------------------------------
+    // دوال مساعدة لتدفق OTP
+    
+    // إنشاء حقول OTP ديناميكياً
+    function createOtpInput() {
+        if (document.getElementById('otpInputContainer')) return; 
+
+        const otpContainer = document.createElement('div');
+        otpContainer.id = 'otpInputContainer';
+        otpContainer.style.cssText = 'margin-top: 15px; padding-top: 15px;';
+        
+        otpContainer.innerHTML = `
+            <div class="col" style="width: 100%;">
+                <label for="otpCode">رمز التحقق لمرة واحدة (OTP)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-key decorator-icon"></i> 
+                    <input id="otpCode" name="otpCode" type="text" placeholder="أدخل الرمز المكون من 6 أرقام" pattern="[0-9]{6}" maxlength="6" required />
+                </div>
+            </div>
+            <button type="button" class="btn-accept" id="verifyOtpBtn">تحقق وأكمل الدخول</button>
+        `;
+        
+        // إزالة العناصر التي قد تتداخل
+        const existingBtn = document.getElementById('verifyOtpBtn');
+        if (existingBtn) existingBtn.remove();
+        
+        loginForm.appendChild(otpContainer);
+
+        // إضافة مستمع لزر التحقق
+        document.getElementById('verifyOtpBtn').addEventListener('click', handleOtpVerification);
+        
+        // محاولة جلب البيانات المخزنة إذا كانت موجودة، لضمان استمرار الجلسة
+        const storedData = localStorage.getItem(OTP_PENDING_KEY);
+        if (storedData) {
+            // تحديث المتغير المؤقت من التخزين المحلي فوراً إذا وجدنا البيانات
+            pendingLoginData = JSON.parse(storedData);
+        }
+    }
+    
+    // إخفاء حقول OTP
+    function hideOtpInput() {
+        const otpContainer = document.getElementById('otpInputContainer');
+        if (otpContainer) {
+            otpContainer.remove();
+        }
+        pendingLoginData = null; // مسح المتغير المؤقت من الذاكرة
+        loginSubmitBtn.style.display = 'block'; // إعادة زر تسجيل الدخول الأصلي
+    }
+    
+    // معالج التحقق من OTP
+    async function handleOtpVerification() {
+        const otpInput = document.getElementById('otpCode').value.trim();
+        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+
+        let currentPendingData = pendingLoginData;
+        
+        if (!currentPendingData) {
+            const storedData = localStorage.getItem(OTP_PENDING_KEY); 
+            if (storedData) {
+                currentPendingData = JSON.parse(storedData);
+                pendingLoginData = currentPendingData;
+            }
+        }
+        
+        if (otpInput.length !== 6) { 
+            showMessage(loginErrorBox, 'الرجاء إدخال رمز تحقق صحيح (6 أرقام).');
+            return;
+        }
+
+        if (!currentPendingData) {
+            showMessage(loginErrorBox, 'انتهت جلسة تسجيل الدخول. الرجاء البدء من جديد بإدخال البريد وكلمة المرور.');
+            localStorage.removeItem(OTP_PENDING_KEY);
+            return;
+        }
+
+        setLoadingState(verifyOtpBtn, 'جاري التحقق...');
+        loginErrorBox.classList.remove('show');
+
+        // إرسال البيانات كاملة مع OTP
+        const formData = {
+            ...currentPendingData, 
+            otp: otpInput
+        };
+
+        const result = await sendDataToScript('login', formData);
+
+        resetButton(verifyOtpBtn);
+
+        if (result.success) {
+            // النجاح: مسح بيانات الجلسة المؤقتة بعد النجاح
+            localStorage.removeItem(OTP_PENDING_KEY); 
+            pendingLoginData = null; 
+            
+            showMessage(loginErrorBox, 'تم تأكيد الجهاز بنجاح! يتم الآن توجيهك...', 1500);
+            setTimeout(() => {
+                showWelcome(result);
+            }, 1500);
+        } else {
+            // فشل التحقق
+            showMessage(loginErrorBox, result.message);
+        }
+    }
+
+
+    // ----------------------------------------------------------------------
+    // معالجة تسجيل الدخول 
+    loginForm.addEventListener('submit', async e=>{
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      
+      if (!email || !password) {
+          showMessage(loginErrorBox, 'الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+          return;
+      }
+      
+      pendingLoginData = { email, password }; 
+      localStorage.setItem(OTP_PENDING_KEY, JSON.stringify(pendingLoginData)); 
+      
+      hideOtpInput(); 
+      
+      setLoadingState(loginSubmitBtn, 'جاري تسجيل الدخول...');
+      
+      loginErrorBox.classList.remove('show');
+
+      const formDataToSend = { email, password };
+
+      const result = await sendDataToScript('login', formDataToSend);
+      
+      resetButton(loginSubmitBtn);
+
+      if(result.success){
+        // تسجيل الدخول الناجح (جهاز معروف)
+        localStorage.removeItem(OTP_PENDING_KEY); 
+        showWelcome(result); 
+      } else if (result.require_otp) {
+        // حالة الجهاز الجديد: طلب رمز OTP (هنا نحتفظ بالبيانات المخزنة)
+        showMessage(loginErrorBox, result.message, 5000);
+        createOtpInput();
+        loginSubmitBtn.style.display = 'none'; // إخفاء زر الدخول الأصلي
+      } else {
+        // خطأ عام في الدخول (كلمة مرور خطأ، بريد غير موجود، الخ.)
+        localStorage.removeItem(OTP_PENDING_KEY); 
+        pendingLoginData = null; 
+        showMessage(loginErrorBox, result.message);
+      }
+    });
+
+    // ----------------------------------------------------------------------
+    // معالجة تسجيل مسوّق جديد المحدثة
+    signupFormElement.addEventListener('submit', async e=>{
+      e.preventDefault();
+      
+      const fullname = document.getElementById('fullname').value.trim();
+      const gender = document.getElementById('gender').value;
+      const country = document.getElementById('country').value;
+      const phone = document.getElementById('phone');
+      const email = document.getElementById('email');
+      const password = document.getElementById('password').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      // استخراج قيمة المُحيل من الحقل المخفي
+      const referrerMarketerId = document.getElementById('marketer_id_input').value.trim(); 
+
+      signupErrorBox.classList.remove('show');
+      successBox.classList.remove('show');
+      
+      // التحققات المحلية
+      if(password !== confirmPassword){
+        showMessage(signupErrorBox, 'كلمتا المرور غير متطابقتين');
+        return;
+      }
+      
+      if (phone.value.length < 6 || !phone.validity.valid) {
+          showMessage(signupErrorBox, 'يرجى إدخال رقم هاتف صالح (على الأقل 6 أرقام).');
+          return;
+      }
+
+      setLoadingState(submitBtn, 'جاري إنشاء الحساب...');
+      
+      const formData = { 
+          fullname, 
+          gender, 
+          country, 
+          phone: phone.value.trim(), 
+          email: email.value.trim(), 
+          password,
+          // إضافة المعرّف المُحال (إن وجد)
+          referrer_id: referrerMarketerId 
+      };
+      
+      const result = await sendDataToScript('register', formData);
+      
+      resetButton(submitBtn);
+
+      if(result.success){
+        showMessage(successBox, result.message, 1500);
+        setTimeout(()=>{
+          showWelcome({...result, fullname: fullname}); // ****** يتم التوجيه إلى home.html ******
+        }, 1500);
+      } else {
+        showMessage(signupErrorBox, result.message);
+      }
+    });
+
+    // ----------------------------------------------------------------------
+    // وظيفة تبديل عرض كلمة المرور
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const targetInput = document.getElementById(targetId);
+            const isPassword = targetInput.type === 'password';
+            targetInput.type = isPassword ? 'text' : 'password';
+            this.classList.toggle('fa-eye', isPassword);
+            this.classList.toggle('fa-eye-slash', !isPassword);
+        });
+    });
+    
+    // التحقق الفوري من صحة البريد الإلكتروني (عند الخروج من الحقل)
+    document.getElementById('email').addEventListener('blur', function() {
+        if (!this.validity.valid && this.value.trim() !== '') {
+            showMessage(signupErrorBox, 'البريد الإلكتروني غير صحيح.');
+        } else {
+             if (this.validity.valid) signupErrorBox.classList.remove('show');
+        }
+    });
+
+    // دالة نسخ رابط الإحالة (تم حذفها لأن هذا الملف هو لصفحة index.html وليس home.html)
+    
+    // ملء قائمة الدول 
+    const countries = [    "فلسطين", "الأردن", "سوريا", "العراق", "لبنان", "مصر", "السودان", "ليبيا", "تونس", "الجزائر", "المغرب", "موريتانيا", "الصومال", "جيبوتي", "جزر القمر", "السعودية", "اليمن", "الإمارات", "الكويت", "البحرين", "قطر", "سلطنة عمان"];
+    const countrySelect = document.getElementById('country');
+    countries.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      countrySelect.appendChild(opt);
+    });
+
+    // تسجيل الخروج (تم حذفه لأنه يتم في صفحة home.html)
+    
+    // عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', ()=>{
+      getDeviceSerial(); // توليد المعرّف إذا لم يكن موجوداً
+      
+      // ****** منطق استعادة الجلسة وإعادة التوجيه الفوري ******
+      const sessionData = localStorage.getItem(MARKETER_SESSION_KEY);
+      if (sessionData) {
+          try {
+              const data = JSON.parse(sessionData);
+              if(data.marketer_id && data.affiliate_link){
+                 showWelcome(data);
+              } else {
+                 localStorage.removeItem(MARKETER_SESSION_KEY); 
+              }
+          } catch (e) {
+              console.error("خطأ في تحليل بيانات الجلسة المخزنة:", e);
+              localStorage.removeItem(MARKETER_SESSION_KEY); 
+          }
+      }
+      // ******************************************************
+
+      welcomeLoggedIn.style.display = 'none';
+      
+      // ****** التحقق إذا كنا في انتظار OTP عند تحميل الصفحة ******
+      const storedData = localStorage.getItem(OTP_PENDING_KEY);
+      if(storedData) {
+          // إذا وجدنا بيانات، نعيد بناء حقل OTP وننتقل لواجهة تسجيل الدخول
+          actionButtons.forEach(b => b.classList.remove('active'));
+          document.querySelector('[data-action="login"]').classList.add('active');
+          loginWrapper.style.display = 'block';
+          registerWrapper.style.display = 'none';
+          
+          createOtpInput();
+          loginSubmitBtn.style.display = 'none'; 
+      }
+    });
+  </script>
+</body>
+</html>
